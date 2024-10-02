@@ -2,36 +2,56 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     astal.url = "github:aylur/astal";
+
+    # systems.url = "github:nix-systems/default-linux";
   };
 
   outputs = {
     self,
     nixpkgs,
     astal,
+    # systems,
   }: let
-    system = "x86_64-linux";
-    pkgs = import nixpkgs {inherit system;};
+    # The way I prefer it:
+    #   forAllSystems = fn: nixpkgs.lib.genAttrs (import systems) (sys: fn {
+    #     inherit sys;
+    #     pkgs = nixpkgs.legacyPackages.${sys};
+    #   });
+    # in
+    #   packages = forAllSystems ({pkgs, sys}:
+    # <insert identical code, except for extra references to ${sys}>...
+    #  devShells = forAllSystems ({pkgs, sys}:
+    # <insert identical code>...
+    # AGSv1 style:
+    # Actual cross-system support is disabled since astal doesn't support it
+    genSystems =
+      nixpkgs.lib.genAttrs ["x86_64-linux"]
+      /*
+      (import systems)
+      */
+      ;
+    pkgs = genSystems (sys: nixpkgs.legacyPackages.${sys});
   in {
-    packages.${system} =
-      astal.packages.${system}
+    packages = genSystems (sys:
+      astal.packages.${sys}
       // {
-        default = self.packages.${system}.ags;
-        ags = pkgs.callPackage ./nix {
-          astal = astal.packages.${system}.default;
+        default = self.packages.${sys}.ags;
+        ags = pkgs.${sys}.callPackage ./nix {
+          astal = astal.packages.${sys}.default;
         };
-        agsFull = pkgs.callPackage ./nix {
-          astal = astal.packages.${system}.default;
+        agsFull = pkgs.${sys}.callPackage ./nix {
+          astal = astal.packages.${sys}.default;
           extraPackages = builtins.attrValues (
-            builtins.removeAttrs astal.packages.${system} ["docs"]
+            builtins.removeAttrs astal.packages.${sys} ["docs"]
           );
         };
-      };
-
-    devShells.${system} = {
-      default = astal.devShells.${system}.default.overrideAttrs (_: prev: {
-        buildInputs = prev.buildInputs ++ [pkgs.go];
       });
-    };
+
+    devShells = genSystems (sys: {
+      default = astal.devShells.${sys}.default.overrideAttrs (_: prev: {
+        buildInputs = prev.buildInputs ++ [pkgs.${sys}.go];
+      });
+    });
 
     homeManagerModules.default = import ./nix/module.nix self;
   };
