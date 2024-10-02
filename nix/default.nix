@@ -30,9 +30,9 @@
   ];
 in
   buildGoModule {
-    version = replaceStrings ["\n"] [""] (readFile ./version);
+    version = replaceStrings ["\n"] [""] (readFile ../src/version);
     pname = "ags";
-    src = ./.;
+    src = ../src;
 
     vendorHash = "sha256-MXappgAYaFcxYQVck4fxbAFS1Hn9KsoOOpzmZBgxuM0=";
 
