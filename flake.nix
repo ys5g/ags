@@ -47,6 +47,10 @@
         };
       });
 
+    lib = genSystems (sys: {
+      bundle = import ./nix/bundle.nix self pkgs.${sys};
+    });
+
     devShells = genSystems (sys: {
       default = astal.devShells.${sys}.default.overrideAttrs (_: prev: {
         buildInputs = prev.buildInputs ++ [pkgs.${sys}.go];
