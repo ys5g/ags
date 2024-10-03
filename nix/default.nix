@@ -11,16 +11,21 @@
   nodejs,
   dart-sass,
   extraPackages ? [],
-  astalGjs ? "${astal}/share/astal/gjs"
+  astalGjs ? "${astal}/share/astal/gjs",
 }: let
   inherit (builtins) replaceStrings readFile;
 
-  datadirs = writers.writeNu "datadirs" /*nu*/ ''
-    $env.XDG_DATA_DIRS
-    | split row ":"
-    | filter { $"($in)/gir-1.0" | path exists }
-    | str join ":"
-  '';
+  datadirs =
+    writers.writeNu "datadirs"
+    /*
+    nu
+    */
+    ''
+      $env.XDG_DATA_DIRS
+      | split row ":"
+      | filter { $"($in)/gir-1.0" | path exists }
+      | str join ":"
+    '';
 
   bins = [
     gjs
@@ -41,11 +46,13 @@ in
       gobject-introspection
     ];
 
-    buildInputs = extraPackages ++ [
-      glib
-      gtk3
-      astal
-    ];
+    buildInputs =
+      extraPackages
+      ++ [
+        glib
+        gtk3
+        astal
+      ];
 
     preFixup = ''
       gappsWrapperArgs+=(

@@ -8,8 +8,8 @@ self: {
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkOption mkEnableOption literalExpression;
 
-  defaultAgsPackage = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  defaultAstalPackage = self.packages.${pkgs.stdenv.hostPlatform.system}.astal;
+  defaultAgsPackage = self.packages.${pkgs.system}.default;
+  defaultAstalPackage = self.packages.${pkgs.system}.astal;
   cfg = config.programs.ags;
 in {
   options.programs.ags = {
@@ -18,7 +18,7 @@ in {
     package = mkOption {
       type = types.package;
       default = defaultAgsPackage;
-      defaultText = literalExpression "inputs.ags.packages.${pkgs.stdenv.hostPlatform.system}.default";
+      defaultText = literalExpression "inputs.ags.packages.${pkgs.system}.default";
       description = ''
         The Ags package to use.
 
@@ -29,7 +29,7 @@ in {
     astalPackage = mkOption {
       type = types.package;
       default = defaultAstalPackage;
-      defaultText = literalExpression "inputs.ags.packages.${pkgs.stdenv.hostPlatform.system}.astal";
+      defaultText = literalExpression "inputs.ags.packages.${pkgs.system}.astal";
       description = ''
         The Astal package to use when transpiling.
 
@@ -80,7 +80,7 @@ in {
     })
     (let
       pkg = cfg.package.override {
-        extraPackages = cfg.extraPackages;
+        inherit (cfg) extraPackages;
         astal = cfg.astalPackage;
         astalGjs = "${config.home.homeDirectory}/.local/share/ags";
       };
@@ -110,4 +110,4 @@ in {
       };
     })
   ]);
-} 
+}
