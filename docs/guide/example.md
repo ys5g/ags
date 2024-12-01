@@ -4,6 +4,9 @@ Simple dialog example to get a `no`/`yes` answer.
 
 ![2024-11-13_00-45-58](https://github.com/user-attachments/assets/73a20155-fa0e-4156-aff8-3a0d055abb9b)
 
+> [!NOTE]
+> If ags is installed by nix, change the shebang line to `#!/usr/bin/env -S ags run`
+
 :::code-group
 
 ```tsx [dialog.ts]
